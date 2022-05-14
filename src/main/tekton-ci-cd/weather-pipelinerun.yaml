@@ -1,0 +1,37 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: weather-extractor-pipelinerun
+spec:
+  serviceAccountName: build-bot
+  pipelineRef:
+    name: tekton-cicd-pipeline
+  params:
+  - name: weather-git-url
+    value: https://github.com/ronelcoe/quarkus-tekton-kubernetes.git
+  - name: docker-image
+    value: ronelcoe/quarkus-tekton-kubernetes:1.0
+  - name: docker-file
+    value: quarkus-tekton-kubernetes/src/main/docker/Dockerfile.jvm
+  - name: application-folder-name
+    value: quarkus-tekton-kubernetes
+  - name: k8s-script
+    value: |
+      kubectl apply -f quarkus-tekton-kubernetes/src/main/kubernetes/kubernetes.yaml
+      ----------
+      kubectl get deployment
+  
+  workspaces:
+    - name: maven-settings
+      emptyDir: {}
+    - name: kubeconfig-cm
+      configMap:
+        name: kubeconfig
+    - name: source
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 500Mi

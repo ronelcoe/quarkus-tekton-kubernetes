@@ -1,0 +1,79 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: tekton-cicd-pipeline
+spec:
+  params:
+  - name: weather-git-url
+  - name: application-git-revision
+    default: main
+  - name: application-folder-name
+  - name: docker-image
+  - name: docker-file
+  - name: k8s-script
+
+  workspaces:
+  - name: source
+  - name: maven-settings
+  - name: kubeconfig-cm
+  
+  tasks:
+    - name: weather-git-clone
+      taskRef:
+        name: git-clone
+      params:
+      - name: url
+        value: $(params.weather-git-url)
+      - name: revision
+        value: $(params.application-git-revision)
+      - name: subdirectory
+        value: $(params.application-folder-name)
+      workspaces:
+      - name: output
+        workspace: source
+
+    - name: maven-install-dependencies
+      runAfter:
+        - weather-git-clone
+      taskRef:
+        name: maven
+      params:
+      - name: GOALS
+        value: ["clean","install"]
+      - name: CONTEXT_DIR
+        value: $(params.application-folder-name)
+      workspaces:
+      - name: source
+        workspace: source
+      - name: maven-settings
+        workspace: maven-settings
+
+    - name: build-docker-image
+      runAfter: 
+        - maven-install-dependencies
+      taskRef:
+        name: buildah
+      params:
+      - name: IMAGE
+        value: $(params.docker-image)
+      - name: DOCKERFILE
+        value: $(params.docker-file)
+      - name: CONTEXT
+        value: $(params.application-folder-name)
+      workspaces:
+      - name: source
+        workspace: source
+
+    - name: deploy-to-k8s
+      runAfter:
+        - "build-docker-image"
+      taskRef:
+        name: kubernetes-actions
+      params:
+        - name: script
+          value: "$(params.k8s-script)"
+      workspaces:
+      - name: manifest-dir
+        workspace: source
+      - name: kubeconfig-dir
+        workspace: kubeconfig-cm
