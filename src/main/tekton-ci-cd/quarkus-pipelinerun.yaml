@@ -1,13 +1,13 @@
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
-  name: weather-extractor-pipelinerun
+  name: quarkus-pipelinerun
 spec:
   serviceAccountName: build-bot
   pipelineRef:
     name: tekton-cicd-pipeline
   params:
-  - name: weather-git-url
+  - name: git-url
     value: https://github.com/ronelcoe/quarkus-tekton-kubernetes.git
   - name: docker-image
     value: ronelcoe/quarkus-tekton-kubernetes:1.0

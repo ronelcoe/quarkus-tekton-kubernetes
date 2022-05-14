@@ -4,7 +4,7 @@ metadata:
   name: tekton-cicd-pipeline
 spec:
   params:
-  - name: weather-git-url
+  - name: git-url
   - name: application-git-revision
     default: main
   - name: application-folder-name
@@ -18,12 +18,12 @@ spec:
   - name: kubeconfig-cm
   
   tasks:
-    - name: weather-git-clone
+    - name: git-clone
       taskRef:
         name: git-clone
       params:
       - name: url
-        value: $(params.weather-git-url)
+        value: $(params.git-url)
       - name: revision
         value: $(params.application-git-revision)
       - name: subdirectory
@@ -34,7 +34,7 @@ spec:
 
     - name: maven-install-dependencies
       runAfter:
-        - weather-git-clone
+        - git-clone
       taskRef:
         name: maven
       params:
