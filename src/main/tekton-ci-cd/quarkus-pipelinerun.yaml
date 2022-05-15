@@ -17,7 +17,6 @@ spec:
     value: quarkus-tekton-kubernetes
   - name: k8s-script
     value: |
-      ls -latr quarkus-tekton-kubernetes/src/main/kubernetes
       kubectl apply -f quarkus-tekton-kubernetes/src/main/kubernetes/kubernetes.yaml
       ----------
       kubectl get deployment
