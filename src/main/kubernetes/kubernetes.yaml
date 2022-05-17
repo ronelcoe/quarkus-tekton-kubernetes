@@ -20,10 +20,11 @@ spec:
     - name: http
       port: 80
       targetPort: 8080
+      nodePort: 30080
   selector:
     app.kubernetes.io/name: quarkus-tekton-kubernetes
     app.kubernetes.io/version: 1.0.0-SNAPSHOT
-  type: ClusterIP
+  type: NodePort
 ---
 apiVersion: apps/v1
 kind: Deployment
